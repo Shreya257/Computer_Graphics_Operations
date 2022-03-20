@@ -1,0 +1,101 @@
+
+ 
+
+Problem Statement: Create an complex image in OpenGL of your own choice using primitives
+
+
+
+C++ Code:
+
+#include <GL/glut.h>			// Header file for GLUT library #include <GL/gl.h>	// Header file for OpenGL32 library #include <GL/glu.h>		// Header file for GLu32 library
+/* ASCII code for the escape key. */ #define ESCAPE 27
+/* The number of our GLUT window */ int window;
+/* rotation angle for the triangle. */ float rtri = 0.0f;
+/* rotation angle for the quadrilateral. */ float rquad = 0.0f;
+/* A general OpenGL initialization function sets all of the initial parameters. */ void InitGL(int Width, int Height)
+{
+// Clear the background color to black glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+glClearDepth(1.0);	// Enables clearing of the depth buffer glDepthFunc(GL_LESS);		// The type of depth test to do glEnable(GL_DEPTH_TEST);		// Enables depth testing glShadeModel(GL_SMOOTH);			// Enables smooth color shading
+
+glMatrixMode(GL_PROJECTION);
+glLoadIdentity();	// Reset the projection matrix gluPerspective(45.0f, (GLfloat)Width / (GLfloat)Height, 0.1f, 100.0f);
+glMatrixMode(GL_MODELVIEW);
+}
+
+/* The function called when our window is resized (which shouldn't happen, since it is fullscreen) */
+void ReSizeGLScene(int Width, int Height)
+{
+if (Height == 0)	// Prevent a divide by zero if the window is too small Height = 1;
+
+glViewport(0, 0, Width, Height);	// Reset the current viewport
+ 
+glMatrixMode(GL_PROJECTION); glLoadIdentity();
+
+gluPerspective(45.0f, (GLfloat)Width / (GLfloat)Height, 0.1f, 100.0f); glMatrixMode(GL_MODELVIEW);
+}
+
+float ballX = -0.5f; float ballY = 0.0f; float ballZ = 0.0f;
+
+void drawBall(void) {
+glColor3f(0.0, 1.0, 0.0); //set ball color
+glTranslatef(ballX, ballY, ballZ); //moving it towards the screen a bit on creation glutSolidSphere(0.3, 20, 20); //create ball
+glTranslatef(ballX + 1.5, ballY, ballZ); //moving it towards the screen a bit on creation glutSolidSphere(0.3, 20, 20);
+}
+
+
+/* The main drawing function. */ void DrawGLScene()
+{
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear the screen and the depth buffer
+glLoadIdentity();	// Reset the view
+
+glTranslatef(rtri, 0.0f, -6.0f);	// move left 1.5 units and into the screen 6.0
+
+// draw a triangle (in color mode)
+glBegin(GL_POLYGON);			// Start drawing a polygon glColor3f(0.0f, 0.0f, 1.0f);		// Set color to blue glVertex3f(-1.0f, 1.0f, 0.0f);	// Top left
+glVertex3f(0.4f, 1.0f, 0.0f); glVertex3f(1.0f, 0.4f, 0.0f);
+glColor3f(0.0f, 1.0f, 0.0f);		// Set color to green glVertex3f(1.0f, 0.0f, 0.0f);	// Bottom right glColor3f(1.0f, 0.0f, 0.0f);		// Set color to red glVertex3f(-1.0f, 0.0f, 0.0f);			// Bottom left glEnd();
+drawBall();
+
+rtri += 0.001f;	// Increase the rotation variable for the triangle if (rtri > 2)
+rtri = -2.0f;
+rquad -= 15.0f;	// Decrease the rotation variable for the quad
+// swap the buffers to display, since double buffering is used. glutSwapBuffers();
+}
+ 
+/* The function called whenever a key is pressed. */ void keyPressed(unsigned char key, int x, int y)
+{
+if (key == ESCAPE)
+{
+/* shut down the window */ glutDestroyWindow(window);
+
+/* exit the program...normal termination. */ exit(0);
+}
+}
+
+int main(int argc, char **argv)
+{
+glutInit(&argc, argv);
+
+glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH);
+
+/* get a 600 x 400 window */ glutInitWindowSize(600, 400);
+
+/* the window starts at the upper left corner of the screen */ glutInitWindowPosition(0, 0);
+
+/* Open a window */
+window = glutCreateWindow("A Moving Car");
+
+/* Register the function to do all OpenGL drawing. */ glutDisplayFunc(&DrawGLScene);
+
+/* Even if there are no events, redraw gl scene. */ glutIdleFunc(&DrawGLScene);
+
+/* Register the function called when window is resized. */ glutReshapeFunc(&ReSizeGLScene);
+
+/* Register the function called when the keyboard is pressed. */ glutKeyboardFunc(&keyPressed);
+
+/* Initialize window. */ InitGL(600, 400);
+
+/* Start event processing engine */ glutMainLoop();
+
+return 1;
+}
